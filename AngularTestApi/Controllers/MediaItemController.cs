@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AngularTestApi.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Text.Json.Serialization;
 using System.Xml.Linq;
@@ -11,59 +14,39 @@ namespace AngularTestApi.Controllers
     [ApiController]
     public class MediaItemController : ControllerBase
     {
+        private readonly TestDBContext _dbContext;
+        public MediaItemController(TestDBContext testDBContext) 
+        {
+            _dbContext = testDBContext;
+        }
         // GET: api/<MediaItemController>
         [HttpGet]
-        public string Get()
+        public ActionResult Get()
         {
             List<MediaItem> list = new List<MediaItem>();
-            list.Add(new MediaItem()
-            {
-                id= 1,
-                name= "Firebug",
-                medium= "Series",
-                category= "Science Fiction",
-                year= 2010,
-                watchedOn= 1294166565384,
-                isFavorite= false
-
-            });
-            list.Add(new MediaItem()
-            {
-                id = 1,
-                name = "The Small Tall",
-                medium = "Movies",
-                category = "Comedy",
-                year = 2015,
-                watchedOn = 1294166565384,
-                isFavorite = false
-
-            });
-            list.Add(new MediaItem()
-            {
-                id = 1,
-                name = "The Redemption",
-                medium = "Movies",
-                category = "Action",
-                year = 2016,
-                watchedOn = 1457166565384,
-                isFavorite = false
-
-            });
-            string result=JsonConvert.SerializeObject(list);
-            return result;
+            list=_dbContext.MediaItems.ToList();
+           // string result=JsonConvert.SerializeObject(list);
+            return Ok(list); ;
         }
 
         // GET api/<MediaItemController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpGet("{medium}")]
+        public ActionResult Get(string medium)
         {
-            return "value";
+            List<MediaItem> list = new List<MediaItem>();
+            list = _dbContext.MediaItems.Where(x=>x.Medium==medium).ToList();
+
+            return Ok(list);
         }
 
         // POST api/<MediaItemController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public void Post(MediaItem mediaItem)
         {
+
+            _dbContext.MediaItems.Add(mediaItem);
+            _dbContext.SaveChanges();
+
         }
 
         // PUT api/<MediaItemController>/5
@@ -76,6 +59,9 @@ namespace AngularTestApi.Controllers
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
+            var mediaItem = _dbContext.MediaItems.Find(id);
+            _dbContext.MediaItems.Remove(mediaItem!);
+            _dbContext.SaveChanges();
         }
     }
 }

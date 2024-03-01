@@ -1,6 +1,6 @@
 ﻿namespace AngularTestApi
 {
-    public class MediaItem
+    public class MediaItem1
     {
         public int id { get; set; }
         public string name { get; set; }
